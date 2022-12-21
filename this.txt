@@ -1,0 +1,69 @@
+local ContextActionService = game:GetService("ContextActionService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScripts
+
+local Loader = require(ReplicatedStorage.Packages.Loader)
+
+--Loader.SpawnAll(Loader.LoadDescendants(StarterPlayerScripts.Client.Controllers, Loader.MatchesName("Controller$")), "Main")
+
+local MIN_ZOOM = 8
+local MAX_ZOOM = 16
+
+local cameraOffset = Vector3.new(2, 1.5, 8)
+
+local camera = workspace.CurrentCamera
+local player = Players.LocalPlayer
+
+local characterAdded: any
+local focusControl: any
+
+local function characterAdded(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+
+    local cameraAngleX = 0
+    local cameraAngleY = 0
+
+    local function playerInput(actionName, inputState, inputObject)
+        if inputState == Enum.UserInputState.Change then
+            cameraAngleX -= inputObject.Delta.X
+            cameraAngleY = math.clamp(cameraAngleY - inputObject.Delta.Y * 0.4, -75, 75)
+        end
+    end
+
+    ContextActionService:BindAction("PlayerInput", playerInput, false, Enum.UserInputType.MouseMovement, Enum.UserInputType.Touch)
+
+    RunService:BindToRenderStep("CameraUpdate", Enum.RenderPriority.Camera.Value, function()
+        local startCFrame = CFrame.new(rootPart.CFrame.Position) * CFrame.Angles(0, math.rad(cameraAngleX), 0) * CFrame.Angles(math.rad(cameraAngleY), 0, 0)
+        local cameraCFrame = startCFrame:PointToWorldSpace(cameraOffset)
+        local cameraFocus = startCFrame:PointToWorldSpace(Vector3.new(cameraOffset.X, cameraOffset.Y, -1e6))
+
+        camera.CFrame = CFrame.lookAt(cameraCFrame, cameraFocus)
+
+        local lookingCFrame = CFrame.lookAt(rootPart.Position, camera.CFrame:PointToWorldSpace(Vector3.new(0, 0, -1e6)))
+
+        rootPart.CFrame = CFrame.fromMatrix(rootPart.Position, lookingCFrame.XVector, rootPart.CFrame.YVector)
+    end)
+end
+
+local function focusControl(actionName: string, inputState: Enum.UserInputState, inputObject)
+    if inputState == Enum.UserInputState.Begin then
+        camera.CameraType = Enum.CameraType.Scriptable
+
+        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+        UserInputService.MouseIconEnabled = false
+
+        ContextActionService:UnbindAction("FocusControl")
+    end
+end
+
+ContextActionService:BindAction("FocusControl", focusControl, false, Enum.UserInputType.MouseButton1)
+
+player.CameraMinZoomDistance = MIN_ZOOM
+player.CameraMaxZoomDistance = MAX_ZOOM
+
+player.CharacterAdded:Connect(characterAdded)
+

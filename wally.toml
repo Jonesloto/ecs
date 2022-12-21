@@ -1,0 +1,22 @@
+[package]
+name = "jones/ecs"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+Janitor = "howmanysmall/janitor@1.13.15"
+Promise = "evaera/promise@3.2.0"
+Spring = "brittonfischer/spring@0.1.0"
+Signal = "sleitnick/signal@1.2.1"
+Knit = "sleitnick/knit@1.4.2"
+Component = "sleitnick/component@2.2.0"
+ReplicaService = "brittonfischer/replicaservice@0.1.0"
+ProfileService = "brittonfischer/profileservice@2.1.5"
+BasicState = "csqrl/basicstate@0.2.6"
+EnumList = "sleitnick/enum-list@2.0.1"
+Loader = "sleitnick/loader@2.0.0"
+Net = "sleitnick/net@0.1.0"
+TableUtil = "sleitnick/table-util@1.1.5"
+Matter = "evaera/matter@0.6.2"
+CameraShaker = "brittonfischer/camerashaker@0.1.0"
